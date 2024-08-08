@@ -18,9 +18,8 @@ class ApexTrainer():
     * Description: This method evaluates the model per epoch.
   '''
   @tf.function
-  def evaluate_epoch(self, val_data: EagerTensor, expected: EagerTensor) -> EagerTensor:
+  def evaluate_epoch(self, predicted: EagerTensor, expected: EagerTensor) -> EagerTensor:
     # calculations
-    predicted = self.apex.model(val_data)
     validation_loss = self.apex.loss(predicted, expected)
     validation_r2 = self.get_r2(predicted, expected)
 

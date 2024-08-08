@@ -231,21 +231,24 @@ class Apex(Assertor):
       validation_r2 = []
 
       for val_data in val_dataset.take(-1):
-        validation_loss.append(self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[0])
+        predicted = self.model(val_data)
+        validation_loss.append(self.apex_trainer.evaluate_epoch(predicted, val_data[1])[0])
         if calculate_r2_per_epoch:
-          validation_r2.append(self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[1])
+          validation_r2.append(self.apex_trainer.evaluate_epoch(predicted, val_data[1])[1])
 
       # converting into a tensor
       validation_loss = tf.convert_to_tensor(validation_loss)
+      validation_r2 = tf.convert_to_tensor(validation_r2)
+
+      # logging
       validation_loss = float(tf.math.reduce_mean(validation_loss))
       logs['validation_loss'].append(validation_loss)
-
       print(f'Validation Loss: {validation_loss:.4f}')
+      
       if calculate_r2_per_epoch:
-        validation_r2.append(self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[1])
         validation_r2 = float(tf.math.reduce_mean(validation_r2))
-        print(f'Validation R2: {validation_r2:.4f}%\n')
         logs['validation_r2'].append(validation_r2)
+        print(f'Validation R2: {validation_r2:.4f}%\n')
 
 
     self.write_json(logs)
