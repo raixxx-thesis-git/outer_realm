@@ -81,7 +81,7 @@ class Apex(Assertor):
 
     # dataset
     train_dataset = self.training_dataset.take(-1)
-    val_dataset = self.validation_dataset
+    val_dataset = self.validation_dataset.take(-1)
 
     # start training
     print('Entering training stage now.\nNote: The proper progress bar appears at the second epoch.')
@@ -111,17 +111,22 @@ class Apex(Assertor):
     
       # validation eval
       validation_loss = []
+      validation_r2 = []
 
       for val_data in val_dataset:
-        validation_loss.append(self.evaluate_epoch(val_data[0], val_data[1]))
+        validation_loss.append(self.evaluate_epoch(val_data[0], val_data[1])[0])
+        validation_r2.append(self.evaluate_epoch(val_data[0], val_data[1])[1])
 
       # converting into a tensor
       validation_loss = tf.convert_to_tensor(validation_loss)
+      validation_r2 = tf.convert_to_tensor(validation_r2)
 
       # average validation loss
       validation_loss = float(tf.math.reduce_mean(validation_loss))
+      validation_r2 = float(tf.math.reduce_mean(validation_r2))
 
-      print(f'Validation Loss: {validation_loss:.4f}\n')
+      print(f'Validation Loss: {validation_loss:.4f}')
+      print(f'Validation R2: {validation_r2:.4f}\n')
 
   ''' 
     * DO NOT TOUCH! INTERNAL USE ONLY!
@@ -131,14 +136,15 @@ class Apex(Assertor):
   def evaluate_epoch(self, val_data: EagerTensor, expected: EagerTensor) -> EagerTensor:
     predicted = self.model(val_data)
     validation_loss = self.loss(predicted, expected)
-    return validation_loss
+    validation_r2 = self.get_r2(predicted, expected)
+    return validation_loss, validation_r2
 
   ''' 
     * DO NOT TOUCH! INTERNAL USE ONLY!
     * Description: This method calculates the R^2 score
   '''
   @tf.function
-  def get_r2(predicted: EagerTensor, expected: EagerTensor) -> EagerTensor:
+  def get_r2(self, predicted: EagerTensor, expected: EagerTensor) -> EagerTensor:
     ss_regression = tf.math.reduce_sum(tf.math.square(predicted - expected))
     ss_total = tf.math.reduce_sum(tf.math.square(expected - tf.math.reduce_mean(expected)))
     return 1 - (ss_regression / ss_total)
