@@ -124,7 +124,7 @@ class Apex(Assertor):
     # generate unique training id
     self.training_session_id = str(uuid.uuid4())
     os.mkdir(self.training_session_id)
-    print((f'Your training session ID: {self.training_session_id}. All training logs and model will' 
+    print((f'Your training session ID: {self.training_session_id}.\nAll training logs and model will' 
            f'automatically be saved in {self.training_session_id} folder'))
 
     # refresh memory
@@ -148,7 +148,7 @@ class Apex(Assertor):
             'validation_r2':[]}
 
     # start training
-    print('Entering training stage now.\nNote: Proper progress bar appears at the second epoch.')
+    print('\nEntering training stage now.\nNote: Proper progress bar appears at the second epoch.\n')
 
     for epoch in range(1, self.epoch + 1):
       # logging
