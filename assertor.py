@@ -1,31 +1,32 @@
-import tensorflow as tf
-
-from .apex import Apex
+from __future__ import annotations 
+from typing import TYPE_CHECKING
 from tensorflow.keras import Model
 
-# untouchable
+import tensorflow as tf
+
+if TYPE_CHECKING:
+    from outer_realm.assertor import Assertor
+
+''' 
+  * DO NOT TOUCH! INTERNAL USE ONLY!
+'''
 class OuterRealmMismatch(Exception):
   ''' constructor '''
   def __init__(self, msg):
     super().__init__(msg)
 
+''' 
+  * DO NOT TOUCH! INTERNAL USE ONLY!
+'''
 class Assertor():
-  ''' 
-    DO NOT TOUCH!
-    INTERNAL USE ONLY
-  '''
   def __init__(self):
     pass
 
   ''' 
-    DO NOT TOUCH!
-    INTERNAL USE ONLY
-    +----------------------------------------------------------------------+
-    description: This method is called to assure the user correctly pass
+  * Description: This method is called to assure the user correctly pass
     data types to the touchable methods'/classes' arguments.
-    +----------------------------------------------------------------------+
   '''
-  def user_input_assert_type(self, anno: dict, locals_: dict) -> None:
+  def enforce_static_writing(self, anno: dict, locals_: dict) -> None:
     # used for user-input data types checking
     anno = anno.__annotations__
     for key in anno:
@@ -34,16 +35,8 @@ class Assertor():
                                   f'but got {type(locals_[key])}'))
     pass
 
-  ''' 
-    DO NOT TOUCH!
-    INTERNAL USE ONLY
-  '''
   def model_assert_input_compability(self, model: Model, apex_obj: Apex) -> bool:
     pass
 
-  ''' 
-    DO NOT TOUCH!
-    INTERNAL USE ONLY
-  '''
   def model_assert_output_compability(self, model: Model) -> bool:
     pass
