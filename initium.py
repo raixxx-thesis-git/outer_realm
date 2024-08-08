@@ -43,4 +43,4 @@ def reader_get_data_and_epicenter(tfrecords_dir: list, three_channel: bool) -> _
   # enforcing the user to comply with the predefined data type
   Assertor().enforce_static_writing(reader_get_data_and_epicenter, locals())
 
-  return tf.data.TFRecordDataset(tfrecords_dir).map(_map_reader(three_channel)).unbatch()
+  return tf.data.TFRecordDataset(tfrecords_dir).map(_map_reader(three_channel), num_parallel_calls=tf.data.AUTOTUNE).unbatch()
