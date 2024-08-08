@@ -142,7 +142,7 @@ class Apex(Assertor):
       during the training session.
   '''
   @tf.function
-  def loss(self, predicted: EagerTensor, expected: EagerTensor) -> EagerTensor:
+  def loss(self, predicted, expected):
     # use templatic loss if user loss is not defined
     sum_squared = tf.math.reduce_mean((predicted - expected)**2, axis=0, keepdims=False)
     tf.print(sum_squared)
@@ -162,10 +162,10 @@ class Apex(Assertor):
     with tf.GradientTape() as d:
       # calculating loss
       training_loss = self.loss(predicted, expected)
-      tf.print('s')
-      tf.print(predicted)
-      tf.print(expected)
-      tf.print(training_loss)
+      print('s')
+      print(predicted)
+      print(expected)
+      print(training_loss)
       # calculating ∂L/∂θ
       grad = d.gradient(training_loss, self.model.trainable_variables)
 
