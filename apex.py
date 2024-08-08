@@ -88,8 +88,12 @@ class Apex(Assertor):
     val_dataset = self.validation_dataset
 
     # start training
-    print('Entering training stage now...')
+    print('Entering training stage now.\nNote: The progress bar appears at the second epoch.')
+
     for epoch in range(1, self.epoch + 1):
+      #logging
+      print(f'Epoch {epoch}/{self.epoch}')
+
       # draw training bar, appears at the second epoch
       if epoch != 1:
         bar = self.draw_training_bar(self.total_batch)
@@ -160,7 +164,7 @@ class Apex(Assertor):
     predicted = self.model(train_data)
 
     # applying backward propagation gradient
-    with tf.GradientTaping() as d:
+    with tf.GradientTape() as d:
       # calculating loss
       training_loss = self.user_loss(predicted, expected)
 
