@@ -167,6 +167,8 @@ class Apex(Assertor):
     with tf.GradientTape() as d:
       # calculating loss
       training_loss = self.loss(predicted, expected)
+      print(predicted)
+      print(expected)
       print(training_loss)
       # calculating ∂L/∂θ
       grad = d.gradient(training_loss, self.model.trainable_variables)
