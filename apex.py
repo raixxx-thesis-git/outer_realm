@@ -166,7 +166,7 @@ class Apex(Assertor):
     # applying backward propagation gradient
     with tf.GradientTape() as d:
       # calculating loss
-      training_loss = self.user_loss(predicted, expected)
+      training_loss = self.loss(predicted, expected)
 
       # calculating ∂L/∂θ
       grad = d.gradient(training_loss, self.model.trainable_variables)
