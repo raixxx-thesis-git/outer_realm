@@ -153,16 +153,17 @@ class Apex(Assertor):
     * Description: This method is called to update model's tensors with 
       gradient updating via computational graph backward propagation.
   '''
-  #@tf.function
+  @tf.function
   def update_trainable_tensors(self, train_data, expected):
-    # forward propagation: predicting value
-    predicted = self.model(train_data)
-    print(predicted)
+    
     # applying backward propagation gradient
     with tf.GradientTape() as d:
+      # forward propagation: predicting value
+      predicted = self.model(train_data)
+
       # calculating loss
       training_loss = self.loss(predicted, expected)
-      print('s')
+
       # calculating ∂L/∂θ
       grad = d.gradient(training_loss, self.model.trainable_variables)
 
