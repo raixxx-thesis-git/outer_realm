@@ -189,12 +189,21 @@ class Apex(Assertor):
     self.total_batch = 0
 
     # dataset & logs
-    train_dataset = self.training_dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
-    val_dataset = self.validation_dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
+    cache_folder = f'{self.training_session_id}/cache'
+    os.mkdir(cache_folder)
+    train_dataset = (self.training_dataset
+                         .batch(self.batch_size)
+                         .cache(f'{cache_folder}/training-{training_session_id}')
+                         .prefetch(tf.data.AUTOTUNE))
+    val_dataset = (self.validation_dataset
+                       .batch(self.batch_size)
+                       .cache(f'{cache_folder}/validation-{training_session_id}')
+                       .prefetch(tf.data.AUTOTUNE))
     logs = {'id': self.training_session_id, 
             'training_loss':[], 
             'validation_loss':[], 
             'validation_r2':[]}
+    print(f'\nWARNING: Please remove cached file manually after training. Cache files are saved in {cache_folder}.\n')
 
     # start training
     print('\nEntering training stage now.\nNote: Proper progress bar appears at the second epoch.\n')
