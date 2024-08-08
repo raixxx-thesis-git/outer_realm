@@ -12,9 +12,9 @@ from outer_realm.assertor import Assertor
     to retrieve the data and the epicenter distance information from 'the'
     tfrecords.
 '''
-@tf.function
 def _map_reader(three_channel: bool):
   # complying with the tfrecord structure
+  @tf.function
   def map(bin: SymbolicTensor) -> (SymbolicTensor, SymbolicTensor):
     config = {
       'data': tf.io.FixedLenFeature([], tf.string),
