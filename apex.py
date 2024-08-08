@@ -119,7 +119,7 @@ class Apex(Assertor):
     self.apex_trainer = ApexTrainer(self)
 
     # refresh memory
-    memory_refresh()
+    self.memory_refresh()
 
     # create a copy of an optimizer
     self.temp_optimizer = copy.deepcopy(self.optimizer)
