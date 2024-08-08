@@ -114,17 +114,28 @@ class Apex(Assertor):
       bar.close()
     
       # validation eval
-      validation_loss = tf.constant(0.0)
+      validation_loss = []
 
       for val_data in val_dataset:
-        predicted = self.model(val_data[0])
-        expected = val_data[1]
-        validation_loss += self.loss(predicted, expected)
+        validation_loss.append(evaluate_epoch(val_data[0], val_data[1]))
 
+      # converting into a tensor
+      validation_loss = tf.convert_to_tensor(validation_loss)
+      
       # average validation loss
       validation_loss = float(tf.math.reduce_mean(validation_loss))
 
       print(f'Validation Loss: {validation_loss:.4f}')
+
+  ''' 
+    * DO NOT TOUCH! INTERNAL USE ONLY!
+    * Description: This method evaluates the model per epoch.
+  '''
+  @tf.function
+  def evaluate_epoch(self, val_data: EagerTensor, expected: EagerTensor) -> None:
+    predicted = self.model(val_data)
+    validation_loss = self.loss(predicted, expected)
+    return validation_loss
 
   ''' 
     * DO NOT TOUCH! INTERNAL USE ONLY!
