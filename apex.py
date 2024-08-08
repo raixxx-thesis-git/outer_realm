@@ -154,8 +154,8 @@ class Apex(Assertor):
     self.total_batch = 0
 
     # dataset & logs
-    train_dataset = self.training_dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
-    val_dataset = self.validation_dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
+    train_dataset = self.training_dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
+    val_dataset = self.validation_dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
     logs = {'id': self.training_session_id, 
             'training_loss':[], 
             'validation_loss':[], 
