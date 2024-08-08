@@ -25,6 +25,7 @@ def _map_reader(bin: SymbolicTensor) -> (SymbolicTensor, SymbolicTensor):
 
   # parsing serialized epicentral distance data
   dist = tf.io.parse_tensor(parsed_example['dist'], tf.float32)
+  dist = tf.expand_dims(dist, axis=-1)
 
   return (data, dist)
 
