@@ -15,8 +15,11 @@ from tqdm.std import tqdm as Tqdm
 import tensorflow as tf
 import outer_realm
 import tqdm
+import json
 import copy
+import uuid
 import gc
+import os
 
 class Apex(Assertor):
   def __init__(self,
@@ -106,7 +109,7 @@ class Apex(Assertor):
 
   def update_loss(self, loss: Function) -> None:
     # enforce the user to comply with the predefined data type
-    self.enforce_static_writing(self.update_channel_size, locals())
+    self.enforce_static_writing(self.update_loss, locals())
 
     self.loss = loss    
 
@@ -114,12 +117,21 @@ class Apex(Assertor):
     tf.keras.backend.clear_session()
     gc.collect()
 
-  def train(self):
-    # initiating a trainer
-    self.apex_trainer = ApexTrainer(self)
+  def train(self, save_model_per_epoch: bool=False, calculate_r2_per_epoch: bool=True) -> None:
+    # enforce the user to comply with the predefined data type
+    self.enforce_static_writing(self.train, locals())
+
+    # generate unique training id
+    self.training_session_id = str(uuid.uuid4())
+    os.mkdir(self.training_session_id)
+    print((f'Your training session ID: {self.training_session_id}. All training logs and model will' 
+           f'automatically be saved in {self.training_session_id} folder'))
 
     # refresh memory
     self.memory_refresh()
+
+    # initiating a trainer
+    self.apex_trainer = ApexTrainer(self)
 
     # create a copy of an optimizer
     self.temp_optimizer = copy.deepcopy(self.optimizer)
@@ -127,9 +139,13 @@ class Apex(Assertor):
     # count total batch
     self.total_batch = 0
 
-    # dataset
+    # dataset & logs
     train_dataset = self.training_dataset.take(-1)
     val_dataset = self.validation_dataset.take(-1)
+    logs = {'id': self.training_session_id, 
+            'training_loss':[], 
+            'validation_loss':[], 
+            'validation_r2':[]}
 
     # start training
     print('Entering training stage now.\nNote: Proper progress bar appears at the second epoch.')
@@ -150,36 +166,51 @@ class Apex(Assertor):
         bar.set_description_str(f'Batch {i}/{self.total_batch} | Training Loss: {training_loss:.4f}')
         bar.update(1)
 
+        # counting up the batch
         if epoch == 1:
-          # counting up the batch
           self.total_batch += 1
-      
-      # bar appears at epoch = 2
+
       bar.close()
+
+      # if model save per epoch only
+      if save_model_per_epoch:
+        self.model.save(f'{self.training_session_id}/model-epoch-{epoch}.keras')
     
-      # validation eval
+      # validation evaluation
       validation_loss = []
       validation_r2 = []
 
       for val_data in val_dataset:
         validation_loss.append(self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[0])
-        validation_r2.append(self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[1])
+        if calculate_r2_per_epoch:
+          validation_r2.append(self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[1])
 
       # converting into a tensor
       validation_loss = tf.convert_to_tensor(validation_loss)
-      validation_r2 = tf.convert_to_tensor(validation_r2)
-
-      # average validation loss
       validation_loss = float(tf.math.reduce_mean(validation_loss))
-      validation_r2 = float(tf.math.reduce_mean(validation_r2))
 
       print(f'Validation Loss: {validation_loss:.4f}')
-      print(f'Validation R2: {validation_r2:.4f}%\n')
+      if calculate_r2_per_epoch:
+        validation_r2.append(self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[1])
+        validation_r2 = float(tf.math.reduce_mean(validation_r2))
+        print(f'Validation R2: {validation_r2:.4f}%\n')
 
-      del self.apex_trainer
-      self.memory_refresh()
-      print('Closed training session, Apex Trainer is freed.')
 
+    self.write_json(logs)
+    del self.apex_trainer
+    self.memory_refresh()
+    self.model.save(f'{self.training_session_id}/model-end.keras')
+    print('Closed training session, Apex Trainer is freed.')
+
+  ''' 
+    * DO NOT TOUCH! INTERNAL USE ONLY!
+    * Description: This method writes the model training history in json
+  '''
+  def write_json(self, logs: dict) -> None:
+    json_object = json.dumps(logs)
+    with open(f'{self.training_session_id}/metadata.json', 'w') as f:
+      f.write(json_object)
+  
   ''' 
     * DO NOT TOUCH! INTERNAL USE ONLY!
     * Description: This method is used to calculate the loss of the model

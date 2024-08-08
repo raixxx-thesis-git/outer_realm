@@ -53,6 +53,6 @@ class ApexTrainer():
 
       # calculating ∂L/∂θ and applying θ := θ - α(∂L/∂θ)
       grad = d.gradient(training_loss, self.apex.model.trainable_variables)
-      self.apex.optimizer.apply_gradients(zip(grad, self.apex.model.trainable_variables))
+      self.apex.temp_optimizer.apply_gradients(zip(grad, self.apex.model.trainable_variables))
     
     return training_loss
