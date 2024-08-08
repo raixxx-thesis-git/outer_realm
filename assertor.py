@@ -29,8 +29,6 @@ class Assertor():
   def enforce_static_writing(self, anno: dict, locals_: dict) -> None:
     # used for user-input data types checking
     anno = anno.__annotations__
-    print(anno)
-    print(locals_)
     for key in locals_:
       if type(locals_[key]) != anno[key]:
         raise OuterRealmMismatch((f'User input error. Mismatch data type for key "{key}". Expected {anno[key]} ' 
