@@ -8,6 +8,7 @@ from tensorflow.python.data.ops.batch_op import _BatchDataset
 from tensorflow.python.framework.ops import EagerTensor
 from keras.src.models.functional import Functional
 from outer_realm import Assertor
+from outer_realm import ApexTrainer
 from tensorflow.keras import Model
 from tqdm.std import tqdm as Tqdm
 
@@ -40,7 +41,8 @@ class Apex(Assertor):
     self.loss = self.default_loss if user_loss == None else user_loss
 
     # check model compability
-    self.model_check_compability(model)
+    self.model_assert_input_compability(model, self)
+    self.model_assert_output_compability(model, self)
     
     # check dataset compability
     # self.dataset_assert_compability(training_dataset, 'training', self)
@@ -61,7 +63,8 @@ class Apex(Assertor):
     self.enforce_static_writing(self.update_model, locals())
 
     # check model compability
-    self.model_check_compability(model)
+    self.model_assert_input_compability(model, self)
+    self.model_assert_output_compability(model, self)
 
     # only if the model passes all the test the model would be updated
     self.model = model
@@ -101,10 +104,22 @@ class Apex(Assertor):
 
     self.channel_size = channel_size
 
-  def train(self):
-    # refresh memory
+  def update_loss(self, loss: Function) -> None:
+    # enforce the user to comply with the predefined data type
+    self.enforce_static_writing(self.update_channel_size, locals())
+
+    self.loss = loss    
+
+  def memory_refresh(self) -> None:
     tf.keras.backend.clear_session()
     gc.collect()
+
+  def train(self):
+    # initiating a trainer
+    self.apex_trainer = ApexTrainer(self)
+
+    # refresh memory
+    memory_refresh()
 
     # create a copy of an optimizer
     self.temp_optimizer = copy.deepcopy(self.optimizer)
@@ -117,22 +132,22 @@ class Apex(Assertor):
     val_dataset = self.validation_dataset.take(-1)
 
     # start training
-    print('Entering training stage now.\nNote: The proper progress bar appears at the second epoch.')
+    print('Entering training stage now.\nNote: Proper progress bar appears at the second epoch.')
 
     for epoch in range(1, self.epoch + 1):
-      #logging
+      # logging
       print(f'Epoch {epoch}/{self.epoch}')
 
       # draw training bar, appears at the second epoch
       bar = self.draw_training_bar(self.total_batch)
 
       # updating model's tensor (learning)
-      for train_data in train_dataset:
+      for i, train_data in enumerate(train_dataset):
         # info: the following call is optimized.
-        training_loss = float(self.update_trainable_tensors(train_data[0], train_data[1]))
+        training_loss = float(self.apex_trainer.update_trainable_tensors(train_data[0], train_data[1]))
 
         # updating logs
-        bar.set_description_str(f'Training Loss: {training_loss:.4f}')
+        bar.set_description_str(f'Batch {i}/{self.total_batch} | Training Loss: {training_loss:.4f}')
         bar.update(1)
 
         if epoch == 1:
@@ -147,8 +162,8 @@ class Apex(Assertor):
       validation_r2 = []
 
       for val_data in val_dataset:
-        validation_loss.append(self.evaluate_epoch(val_data[0], val_data[1])[0])
-        validation_r2.append(self.evaluate_epoch(val_data[0], val_data[1])[1])
+        validation_loss.append(self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[0])
+        validation_r2.append(self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[1])
 
       # converting into a tensor
       validation_loss = tf.convert_to_tensor(validation_loss)
@@ -161,36 +176,10 @@ class Apex(Assertor):
       print(f'Validation Loss: {validation_loss:.4f}')
       print(f'Validation R2: {validation_r2:.4f}%\n')
 
-  ''' 
-    * DO NOT TOUCH! INTERNAL USE ONLY!
-    * Description: This method evaluates the model per epoch.
-  '''
-  @tf.function
-  def evaluate_epoch(self, val_data: EagerTensor, expected: EagerTensor) -> EagerTensor:
-    predicted = self.model(val_data)
-    validation_loss = self.loss(predicted, expected)
-    validation_r2 = self.get_r2(predicted, expected)
-    return validation_loss, validation_r2
+      del self.apex_trainer
+      self.memory_refresh()
+      print('Closed training session, Apex Trainer is freed.')
 
-  ''' 
-    * DO NOT TOUCH! INTERNAL USE ONLY!
-    * Description: This method calculates the R^2 score
-  '''
-  @tf.function
-  def get_r2(self, predicted: EagerTensor, expected: EagerTensor) -> EagerTensor:
-    ss_regression = tf.math.reduce_sum(tf.math.square(predicted - expected))
-    ss_total = tf.math.reduce_sum(tf.math.square(expected - tf.math.reduce_mean(expected)))
-    return 1 - (ss_regression / ss_total)
-
-  ''' 
-    * DO NOT TOUCH! INTERNAL USE ONLY!
-    * Description: This method checks whether the model complies with the
-      user's defined configuration.
-  '''
-  def model_check_compability(self, model: Functional):
-    self.model_assert_input_compability(model, self)
-    self.model_assert_output_compability(model, self)
-    
   ''' 
     * DO NOT TOUCH! INTERNAL USE ONLY!
     * Description: This method is used to calculate the loss of the model
@@ -205,39 +194,15 @@ class Apex(Assertor):
 
   ''' 
     * DO NOT TOUCH! INTERNAL USE ONLY!
-    * Description: This method is called to update model's tensors with 
-      gradient updating via computational graph backward propagation.
-  '''
-  @tf.function
-  def update_trainable_tensors(self, train_data: EagerTensor, expected: EagerTensor) -> EagerTensor:
-
-    # applying backward propagation gradient
-    with tf.GradientTape() as d:
-      # forward propagation: predicting value
-      predicted = self.model(train_data)
-
-      # calculating loss
-      training_loss = self.loss(predicted, expected)
-
-      # calculating ∂L/∂θ
-      grad = d.gradient(training_loss, self.model.trainable_variables)
-
-      # updating θ := θ - α(∂L/∂θ)
-      self.optimizer.apply_gradients(zip(grad, self.model.trainable_variables))
-    
-    return training_loss
-
-  ''' 
-    * DO NOT TOUCH! INTERNAL USE ONLY!
-    * Description: This method calculates how many batch exists in a batch dataset.
-  '''
-  @tf.function
-  def get_dataset_length(self, dataset: _BatchDataset) -> int:
-    return dataset.reduce(0, lambda x,_: x+1)
-
-  ''' 
-    * DO NOT TOUCH! INTERNAL USE ONLY!
     * Description: This method draws a training progress bar.
   '''
   def draw_training_bar(self, total_batch: int) -> Tqdm:
     return tqdm.tqdm(total=total_batch, ascii='._█', position=0, bar_format='|{bar:30}| [{elapsed}<{remaining}] {desc}')
+
+  # ''' 
+  #   * DO NOT TOUCH! INTERNAL USE ONLY!
+  #   * Description: This method calculates how many batch exists in a batch dataset.
+  # '''
+  # @tf.function
+  # def get_dataset_length(self, dataset: _BatchDataset) -> int:
+  #   return dataset.reduce(0, lambda x,_: x+1)
