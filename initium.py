@@ -14,15 +14,16 @@ from outer_realm.assertor import Assertor
 '''
 def _map_reader(three_channel: bool):
   # complying with the tfrecord structure
+  config = {
+    'data': tf.io.FixedLenFeature([], tf.string),
+    'dist': tf.io.FixedLenFeature([], tf.string)
+  }
+
   @tf.function
   def map(bin: SymbolicTensor) -> (SymbolicTensor, SymbolicTensor):
-    config = {
-      'data': tf.io.FixedLenFeature([], tf.string),
-      'dist': tf.io.FixedLenFeature([], tf.string)
-    }
-
     # parsing example and tensor
     parsed_example = tf.io.parse_example(bin, config)
+    
     if not three_channel:
       data = tf.io.parse_tensor(parsed_example['data'], tf.float32)[:,0:1,300:5000]
     else:
