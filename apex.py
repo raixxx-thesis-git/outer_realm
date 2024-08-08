@@ -20,6 +20,7 @@ class Apex(Assertor):
                training_dataset: _UnbatchDataset,
                validation_dataset: _UnbatchDataset,
                window_length: int,
+               channel_size: int,
                batch_size: int,
                model: Model,
                epoch: int,
@@ -93,10 +94,18 @@ class Apex(Assertor):
     
     return training_loss
 
+  ''' 
+    * DO NOT TOUCH! INTERNAL USE ONLY!
+    * Description: This method calculates how many batch exists in a batch dataset.
+  '''
   @tf.function
   def get_dataset_length(self, dataset: _BatchDataset) -> int:
     return dataset.reduce(0, lambda x,_: x+1)
 
+  ''' 
+    * DO NOT TOUCH! INTERNAL USE ONLY!
+    * Description: This method draws a training progress bar.
+  '''
   def draw_training_bar(self, total_batch: int) -> Tqdm:
     return tqdm.tqdm(total=total_batches, ascii='._█', position=0, bar_format='|{bar:30}| [{elapsed}<{remaining}] {desc}')
 
