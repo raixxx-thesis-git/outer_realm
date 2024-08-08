@@ -29,7 +29,7 @@ class Apex(Assertor):
                user_loss: Function = None,
                ) -> None:
     # enforcing the user to comply with the predefined data type
-    self.enforce_static_writing(self.__init__, locals())
+    self.enforce_static_writing(self.__init__, locals(), exception='user_loss')
 
     # configurations
     self.batch_size = batch_size

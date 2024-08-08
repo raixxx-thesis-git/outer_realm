@@ -26,11 +26,12 @@ class Assertor():
   * Description: This method is called to assure the user correctly pass
     data types to the touchable methods'/classes' arguments.
   '''
-  def enforce_static_writing(self, anno: dict, locals_: dict) -> None:
+  def enforce_static_writing(self, anno: dict, locals_: dict, exceptions: list = []) -> None:
     # used for user-input data types checking
     anno = anno.__annotations__
     for key in locals_:
       if key == 'self': continue
+      if key in exceptions: continue
       if type(locals_[key]) != anno[key]:
         raise OuterRealmMismatch((f'User input error. Mismatch data type for key "{key}". Expected {anno[key]} ' 
                                   f'but got {type(locals_[key])}'))
