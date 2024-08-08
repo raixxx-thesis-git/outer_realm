@@ -65,6 +65,7 @@ class Apex():
     gradient updating via computational graph backward propagation.
     +----------------------------------------------------------------------+
   '''
+  @tf.function
   def backprop_apply_gradient(predicted: EagerTensor, expected: EagerTensor) -> EagerTensor:
     # applying backward propagation gradient
     with tf.GradientTaping() as d:
