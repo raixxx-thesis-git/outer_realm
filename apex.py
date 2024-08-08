@@ -144,14 +144,8 @@ class Apex(Assertor):
   @tf.function
   def loss(self, predicted: EagerTensor, expected: EagerTensor) -> EagerTensor:
     # use templatic loss if user loss is not defined
-    if self.user_loss == None:
-      sum_squared = tf.math.reduce_mean((predicted - expected)**2, axis=0, keepdims=False)
-      return sum_squared[0]
-
-    # use user loss if user loss is defined
-    else:
-      # user loss must return a scalar!
-      return self.user_loss(predicted, expected)
+    sum_squared = tf.math.reduce_mean((predicted - expected)**2, axis=0, keepdims=False)
+    return sum_squared[0]
 
   ''' 
     * DO NOT TOUCH! INTERNAL USE ONLY!
