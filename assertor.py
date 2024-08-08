@@ -78,7 +78,7 @@ class Assertor():
                                 f' but {expected_output} is expected!'))
     pass
 
-  def dataset_assert_compability(self, dataset: _UnbatchDataset, data_name: str) -> None:
+  def dataset_assert_compability(self, dataset: _UnbatchDataset, data_name: str, apex_obj: Apex) -> None:
     expected_window_length = apex_obj.window_length
     expected_channel_size = apex_obj.channel_size
 

@@ -31,6 +31,13 @@ class Apex(Assertor):
     # enforcing the user to comply with the predefined data type
     self.enforce_static_writing(self.__init__, locals(), exceptions=['user_loss'])
 
+    # configurations
+    self.batch_size = batch_size
+    self.window_length = window_length
+    self.channel_size = channel_size
+    self.user_loss = user_loss
+    self.epoch = epoch
+
     # check model compability
     self.model_check_compability(model)
     
@@ -38,16 +45,10 @@ class Apex(Assertor):
     self.dataset_assert_compability(training_dataset, 'training')
     self.dataset_assert_compability(validation_dataset, 'validation')
 
-    # configurations
-    self.batch_size = batch_size
+    # assign model and dataset if compatible
     self.training_dataset = training_dataset.batch(batch_size)
     self.validation_dataset = validation_dataset.batch(batch_size)
-    self.window_length = window_length
-    self.channel_size = channel_size
-    self.user_loss = user_loss
-    self.epoch = epoch
     self.model = model
-
 
   def define_optimizer(self, optimizer):
     self.optimizer = optimizer
