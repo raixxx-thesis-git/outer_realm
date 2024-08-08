@@ -102,7 +102,7 @@ class Apex(Assertor):
       for train_data in train_dataset:
         # info: the following call is optimized.
         # forward propagation: predicting value
-        predicted = self.model(train_data)
+        predicted = self.model(train_data[0])
         training_loss = float(self.update_trainable_tensors(predicted, train_data[1]))
         
         # bar appears at epoch = 2
