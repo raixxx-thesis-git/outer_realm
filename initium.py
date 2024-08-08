@@ -14,13 +14,13 @@ from outer_realm.assertor import Assertor
 '''
 def _map_reader(three_channel: bool):
   # complying with the tfrecord structure
+  config = {
+    'data': tf.io.FixedLenFeature([], tf.string),
+    'dist': tf.io.FixedLenFeature([], tf.string)
+  }
+
   @tf.function
   def map(bin: SymbolicTensor) -> (SymbolicTensor, SymbolicTensor):
-    config = {
-      'data': tf.io.FixedLenFeature([], tf.string),
-      'dist': tf.io.FixedLenFeature([], tf.string)
-    }
-
     # parsing example and tensor
     parsed_example = tf.io.parse_example(bin, config)
     if not three_channel:
@@ -42,4 +42,4 @@ def reader_get_data_and_epicenter(tfrecords_dir: list, three_channel: bool) -> _
   # enforcing the user to comply with the predefined data type
   Assertor().enforce_static_writing(reader_get_data_and_epicenter, locals())
 
-  return tf.data.TFRecordDataset(tfrecords_dir).map(_map_reader(three_channel)).unbatch()
+  return tf.data.TFRecordDataset(tfrecords_dir).map(_map_reader(three_channel), num_parallel_calls=tf.data.AUTOTUNE).unbatch()
