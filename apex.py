@@ -9,9 +9,6 @@ from tensorflow.python.framework.ops import EagerTensor
 from tensorflow.keras import Model
 
 class Apex():
-
-  # touchable
-  ''' constructor '''
   def __init__(self,
                training_dataset: _UnbatchDataset,
                validation_dataset: _UnbatchDataset,
@@ -20,7 +17,6 @@ class Apex():
                model: Model,
                user_loss: Function = None,
                ) -> None:
-    #
     # defining an assertor
     assertor = outer_realm.Assertor()
 
@@ -39,15 +35,19 @@ class Apex():
     assertor.model_assert_input_compability(self.model, self)
     assertor.model_assert_output_compability(self.model, self)
 
-  # touchable
   def define_optimizer(self, optimizer):
     self.optimizer = optimizer
   
-  # untouchable
-  ''' calculating loss '''
+  ''' 
+    DO NOT TOUCH!
+    INTERNAL USE ONLY
+    +----------------------------------------------------------------------+
+    description: This method is used to calculate the loss of the model
+    during the training session.
+    +----------------------------------------------------------------------+
+  '''
   @tf.function
   def loss(predicted: EagerTensor, expected: EagerTensor) -> EagerTensor:
-    
     # use templatic loss if user loss is not defined
     if self.user_loss == None:
       sum_squared = tf.math.mean((predicted - expected)**2, axis=0, keepdims=False)
@@ -57,10 +57,15 @@ class Apex():
     else:
       return self.user_loss(predicted, expected)
 
-  # untouchable
-  ''' gradient taping '''
+  ''' 
+    DO NOT TOUCH!
+    INTERNAL USE ONLY
+    +----------------------------------------------------------------------+
+    description: This method is called to update model's tensors with 
+    gradient updating via computational graph backward propagation.
+    +----------------------------------------------------------------------+
+  '''
   def backprop_apply_gradient(predicted: EagerTensor, expected: EagerTensor) -> EagerTensor:
-    
     # applying backward propagation gradient
     with tf.GradientTaping() as d:
       # calculating loss

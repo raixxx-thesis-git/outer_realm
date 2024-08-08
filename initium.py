@@ -7,10 +7,18 @@ import tensorflow as tf
 
 from .assertor import Assertor
 
-# untouchable
+''' 
+  DO NOT TOUCH!
+  INTERNAL USE ONLY
+  +----------------------------------------------------------------------+
+  description: This method is called to map the symbolic tensor of the
+  dataset reading into a tuple. This method is specifically designed
+  to retrieve the data and the epicenter distance information from 'the'
+  tfrecords.
+  +----------------------------------------------------------------------+
+'''
 @tf.function
 def _map_reader(bin: SymbolicTensor) -> (SymbolicTensor, SymbolicTensor):
-  
   # parsing example
   parsed_example = tf.io.parse_example(bin, parsing_config)
 
@@ -21,9 +29,7 @@ def _map_reader(bin: SymbolicTensor) -> (SymbolicTensor, SymbolicTensor):
 
   return (data, dist)
 
-# touchable
 def reader_get_data_and_epicenter(tfrecords_dir: list) -> _UnbatchDataset:
-  
   # restricting data types
   assertor = outer_realm.Assertor()
   assertor.user_input_assert_type(reader_get_data_and_epicenter, locals())

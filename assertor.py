@@ -10,15 +10,22 @@ class OuterRealmMismatch(Exception):
     super().__init__(msg)
 
 class Assertor():
-  
-  # untouchable
-  ''' constructor '''
+  ''' 
+    DO NOT TOUCH!
+    INTERNAL USE ONLY
+  '''
   def __init__(self):
     pass
 
-  # untouchable
+  ''' 
+    DO NOT TOUCH!
+    INTERNAL USE ONLY
+    +----------------------------------------------------------------------+
+    description: This method is called to assure the user correctly pass
+    data types to the touchable methods'/classes' arguments.
+    +----------------------------------------------------------------------+
+  '''
   def user_input_assert_type(self, anno: dict, locals_: dict) -> None:
-    
     # used for user-input data types checking
     anno = anno.__annotations__
     for key in anno:
@@ -27,10 +34,16 @@ class Assertor():
                                   f'but got {type(locals_[key])}'))
     pass
 
-  # untouchable
+  ''' 
+    DO NOT TOUCH!
+    INTERNAL USE ONLY
+  '''
   def model_assert_input_compability(self, model: Model, apex_obj: Apex) -> bool:
     pass
 
-  # untouchable
+  ''' 
+    DO NOT TOUCH!
+    INTERNAL USE ONLY
+  '''
   def model_assert_output_compability(self, model: Model) -> bool:
     pass
