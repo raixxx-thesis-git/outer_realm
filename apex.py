@@ -101,7 +101,9 @@ class Apex(Assertor):
       # updating model's tensor (learning)
       for train_data in train_dataset:
         # info: the following call is optimized.
-        training_loss = float(self.update_trainable_tensors(train_data[0], train_data[1]))
+        # forward propagation: predicting value
+        predicted = self.model(train_data)
+        training_loss = float(self.update_trainable_tensors(predicted, train_data[1]))
         
         # bar appears at epoch = 2
         if epoch != 1:
@@ -142,10 +144,9 @@ class Apex(Assertor):
       during the training session.
   '''
   @tf.function
-  def loss(self, predicted, expected):
+  def loss(self, predicted: EagerTensor, expected: EagerTensor) -> EagerTensor:
     # use templatic loss if user loss is not defined
     sum_squared = tf.math.reduce_mean((predicted - expected)**2, axis=0, keepdims=False)
-    tf.print(sum_squared)
     return sum_squared[0]
 
   ''' 
@@ -154,13 +155,10 @@ class Apex(Assertor):
       gradient updating via computational graph backward propagation.
   '''
   @tf.function
-  def update_trainable_tensors(self, train_data, expected):
-    
+  def update_trainable_tensors(self, predicted: EagerTensor, expected: EagerTensor):
+
     # applying backward propagation gradient
     with tf.GradientTape() as d:
-      # forward propagation: predicting value
-      predicted = self.model(train_data)
-
       # calculating loss
       training_loss = self.loss(predicted, expected)
 
