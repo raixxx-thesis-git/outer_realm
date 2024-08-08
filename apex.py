@@ -36,6 +36,7 @@ class Apex(Assertor):
     self.training_dataset = training_dataset.batch(batch_size)
     self.validation_dataset = validation_dataset.batch(batch_size)
     self.window_length = window_length
+    self.channel_size = channel_size
     self.user_loss = user_loss
     self.epoch = epoch
     
