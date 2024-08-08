@@ -7,12 +7,14 @@ import tensorflow as tf
 if TYPE_CHECKING:
     from outer_realm.assertor import Apex
 
+''' 
+  * DO NOT TOUCH! INTERNAL USE ONLY!
+'''
 class ApexTrainer():
   def __init__(self, apex: Apex) -> None:
     self.apex = apex
   
   ''' 
-    * DO NOT TOUCH! INTERNAL USE ONLY!
     * Description: This method evaluates the model per epoch.
   '''
   @tf.function
@@ -25,7 +27,6 @@ class ApexTrainer():
     return validation_loss, validation_r2
 
   ''' 
-    * DO NOT TOUCH! INTERNAL USE ONLY!
     * Description: This method calculates the R^2 score
   '''
   @tf.function
@@ -39,7 +40,6 @@ class ApexTrainer():
     return 1 - (ss_regression / ss_total)
 
   ''' 
-    * DO NOT TOUCH! INTERNAL USE ONLY!
     * Description: This method is called to update model's tensors with 
       gradient updating via computational graph backward propagation.
   '''
