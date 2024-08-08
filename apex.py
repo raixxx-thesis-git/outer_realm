@@ -50,6 +50,9 @@ class Apex(Assertor):
     self.validation_dataset = validation_dataset.batch(batch_size)
     self.model = model
 
+    # optional(s):
+    self.total_batch = None
+
   def define_optimizer(self, optimizer):
     self.optimizer = optimizer
 
@@ -63,6 +66,12 @@ class Apex(Assertor):
     # only if the model passes all the test the model would be updated
     self.model = model
 
+  def count_total_batch(self):
+    print('Please wait. Counting total batch now.')
+    total_batch = int(self.get_dataset_length(self.training_dataset))
+    self.total_batch = total_batch
+    print(f'Done! I found {total_batch} batches in your dataset.')
+
   def train(self):
     # refreshing memory
     tf.keras.backend.clear_session()
@@ -72,9 +81,9 @@ class Apex(Assertor):
     self.temp_optimizer = copy.deepcopy(self.optimizer)
 
     # count total batch
-    print('Please wait. Counting total batch now.')
-    total_batch = int(self.get_dataset_length(self.training_dataset))
-    print(f'Done! I found {total_batch} batches in your dataset.')
+    if self.total_batch == None: self.count_total_batch()
+    else:
+      print(f'I found {total_batch} batches in your dataset.')
 
     # dataset
     train_dataset = self.training_dataset.take(-1)
@@ -84,7 +93,7 @@ class Apex(Assertor):
     print('Entering training stage now...')
     for epoch in range(1, self.epoch + 1):
       # draw training bar
-      bar = draw_training_bar(total_batch)
+      bar = self.draw_training_bar(total_batch)
 
       # updating model's tensor (learning)
       for train_data in train_dataset:
