@@ -226,33 +226,49 @@ class Apex(Assertor):
         self.model.save(f'{self.training_session_id}/model-epoch-{epoch}.keras')
     
       logs['training_loss'].append(training_loss)
-      # validation evaluation
-      validation_loss = []
-      validation_r2 = []
 
-      for val_data in val_dataset.take(-1):
-        validation_loss.append(self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[0])
-        if calculate_r2_per_epoch:
-          validation_r2.append(self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[1])
+      # validation evaluation
+      validation_loss, validation_r2 = self.validation_data_get_logs(calculate_r2_per_epoch)
+      validation_loss = float(validation_loss)
+      validation_r2 = float(validation_r2)
+
+      # validation_loss = []
+      # validation_r2 = []
+
+      # for val_data in val_dataset.take(-1):
+      #   validation_loss.append(self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[0])
+      #   if calculate_r2_per_epoch:
+      #     validation_r2.append(self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[1])
 
       # converting into a tensor
-      validation_loss = tf.convert_to_tensor(validation_loss)
-      validation_loss = float(tf.math.reduce_mean(validation_loss))
+      # validation_loss = tf.convert_to_tensor(validation_loss)
+      # validation_loss = float(tf.math.reduce_mean(validation_loss))
       logs['validation_loss'].append(validation_loss)
-
       print(f'Validation Loss: {validation_loss:.4f}')
+
       if calculate_r2_per_epoch:
-        validation_r2.append(self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[1])
-        validation_r2 = float(tf.math.reduce_mean(validation_r2))
-        print(f'Validation R2: {validation_r2:.4f}%\n')
         logs['validation_r2'].append(validation_r2)
-
-
+        print(f'Validation R2: {validation_r2:.4f}%\n')
+        
     self.write_json(logs)
     del self.apex_trainer
     self.memory_refresh()
     self.model.save(f'{self.training_session_id}/model-end.keras')
     print('Closed training session, Apex Trainer is freed.')
+
+  @tf.function
+  def validation_data_get_logs(self, calculate_r2_per_epoch: bool) -> (EagerTensor, EagerTensor):
+    validation_loss = tf.constant(0.0)
+    validation_r2 = tf.constant(0.0)
+    i = tf.constant(0.0)
+
+    for val_data in val_dataset.take(-1):
+      validation_loss += self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[0]
+      if calculate_r2_per_epoch:
+        validation_r2 += self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[1]
+      i += 1.0
+    
+    return (validation_loss / i, validation_r2 / i)
 
   ''' 
     * DO NOT TOUCH! INTERNAL USE ONLY!
