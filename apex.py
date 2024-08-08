@@ -183,4 +183,4 @@ class Apex(Assertor):
     * Description: This method draws a training progress bar.
   '''
   def draw_training_bar(self, total_batch: int) -> Tqdm:
-    return tqdm.tqdm(total=total_batches, ascii='._█', position=0, bar_format='|{bar:30}| [{elapsed}<{remaining}] {desc}')
+    return tqdm.tqdm(total=total_batch, ascii='._█', position=0, bar_format='|{bar:30}| [{elapsed}<{remaining}] {desc}')
