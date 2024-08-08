@@ -56,8 +56,8 @@ class Apex(Assertor):
     print('Done! Your dataset is compatible.')
 
     # assign model and dataset if compatible
-    self.training_dataset = training_dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
-    self.validation_dataset = validation_dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
+    self.training_dataset = training_dataset
+    self.validation_dataset = validation_dataset
     self.model = model
 
     # optional(s):
@@ -88,8 +88,8 @@ class Apex(Assertor):
     print('Done! Your dataset is compatible.')
 
     # update dataset
-    self.training_dataset = training_dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
-    self.validation_dataset = validation_dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
+    self.training_dataset = training_dataset
+    self.validation_dataset = validation_dataset
 
   def update_batch_size(self, batch_size: int) -> None:
     # enforce the user to comply with the predefined data type
@@ -125,6 +125,12 @@ class Apex(Assertor):
     tf.keras.backend.clear_session()
     gc.collect()
 
+  def save_model(self, path: str) -> None:
+    # enforce the user to comply with the predefined data type
+    self.enforce_static_writing(self.save_model, locals())
+
+    self.model.save(path)
+
   def train(self, save_model_per_epoch: bool=False, calculate_r2_per_epoch: bool=True) -> None:
     # enforce the user to comply with the predefined data type
     self.enforce_static_writing(self.train, locals())
@@ -133,7 +139,7 @@ class Apex(Assertor):
     self.training_session_id = str(uuid.uuid4())
     os.mkdir(self.training_session_id)
     print((f'Your training session ID: {self.training_session_id}.\nAll training logs and model will ' 
-           f'automatically be saved in {self.training_session_id} folder'))
+           f'automatically be saved in {self.training_session_id} folder.'))
 
     # refresh memory
     self.memory_refresh()
@@ -148,8 +154,8 @@ class Apex(Assertor):
     self.total_batch = 0
 
     # dataset & logs
-    train_dataset = self.training_dataset.take(-1)
-    val_dataset = self.validation_dataset.take(-1)
+    train_dataset = self.training_dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
+    val_dataset = self.validation_dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
     logs = {'id': self.training_session_id, 
             'training_loss':[], 
             'validation_loss':[], 
@@ -166,7 +172,7 @@ class Apex(Assertor):
       bar = self.draw_training_bar(self.total_batch)
 
       # updating model's tensor (learning)
-      for i, train_data in enumerate(train_dataset):
+      for i, train_data in enumerate(train_dataset.take(-1)):
         # info: the following call is optimized.
         training_loss = float(self.apex_trainer.update_trainable_tensors(train_data[0], train_data[1]))
 
@@ -184,11 +190,12 @@ class Apex(Assertor):
       if save_model_per_epoch:
         self.model.save(f'{self.training_session_id}/model-epoch-{epoch}.keras')
     
+      logs['training_loss'].append(training_loss)
       # validation evaluation
       validation_loss = []
       validation_r2 = []
 
-      for val_data in val_dataset:
+      for val_data in val_dataset.take(-1):
         validation_loss.append(self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[0])
         if calculate_r2_per_epoch:
           validation_r2.append(self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[1])
@@ -196,12 +203,14 @@ class Apex(Assertor):
       # converting into a tensor
       validation_loss = tf.convert_to_tensor(validation_loss)
       validation_loss = float(tf.math.reduce_mean(validation_loss))
+      logs['validation_loss'].append(validation_loss)
 
       print(f'Validation Loss: {validation_loss:.4f}')
       if calculate_r2_per_epoch:
         validation_r2.append(self.apex_trainer.evaluate_epoch(val_data[0], val_data[1])[1])
         validation_r2 = float(tf.math.reduce_mean(validation_r2))
         print(f'Validation R2: {validation_r2:.4f}%\n')
+        logs['validation_r2'].append(validation_r2)
 
 
     self.write_json(logs)
