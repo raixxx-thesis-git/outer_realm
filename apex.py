@@ -37,6 +37,7 @@ class Apex(Assertor):
     self.channel_size = channel_size
     self.user_loss = user_loss
     self.epoch = epoch
+    self.loss = self.default_loss if user_loss == None else user_loss
 
     # check model compability
     self.model_check_compability(model)
@@ -66,11 +67,6 @@ class Apex(Assertor):
     # only if the model passes all the test the model would be updated
     self.model = model
 
-  def count_total_batch(self):
-    print('Please wait. Counting total batch now.')
-    total_batch = int(self.get_dataset_length(self.training_dataset))
-    self.total_batch = total_batch
-    print(f'Done! I found {total_batch} batches in your dataset.')
 
   def train(self):
     # refreshing memory
@@ -125,17 +121,27 @@ class Apex(Assertor):
       # average validation loss
       validation_loss = float(tf.math.reduce_mean(validation_loss))
 
-      print(f'Validation Loss: {validation_loss:.4f}')
+      print(f'Validation Loss: {validation_loss:.4f}\n')
 
   ''' 
     * DO NOT TOUCH! INTERNAL USE ONLY!
     * Description: This method evaluates the model per epoch.
   '''
   @tf.function
-  def evaluate_epoch(self, val_data: EagerTensor, expected: EagerTensor) -> None:
+  def evaluate_epoch(self, val_data: EagerTensor, expected: EagerTensor) -> EagerTensor:
     predicted = self.model(val_data)
     validation_loss = self.loss(predicted, expected)
     return validation_loss
+
+  ''' 
+    * DO NOT TOUCH! INTERNAL USE ONLY!
+    * Description: This method calculates the R^2 score
+  '''
+  @tf.function
+  def get_r2(predicted: EagerTensor, expected: EagerTensor) -> EagerTensor:
+    ss_regression = tf.math.reduce_sum(tf.math.square(predicted - expected))
+    ss_total = tf.math.reduce_sum(tf.math.square(expected - tf.math.reduce_mean(expected)))
+    return 1 - (ss_regression / ss_total)
 
   ''' 
     * DO NOT TOUCH! INTERNAL USE ONLY!
@@ -152,9 +158,10 @@ class Apex(Assertor):
       during the training session.
   '''
   @tf.function
-  def loss(self, predicted: EagerTensor, expected: EagerTensor) -> EagerTensor:
-    # use templatic loss if user loss is not defined
-    sum_squared = tf.math.reduce_mean((predicted - expected)**2, axis=0, keepdims=False)
+  def default_loss(self, predicted: EagerTensor, expected: EagerTensor) -> EagerTensor:
+    # use default loss if user loss is not defined: an MSE loss
+    squared_vec = tf.math.square(predicted - expected)
+    sum_squared = tf.math.reduce_mean(squared_vec, axis=0, keepdims=False)
     return sum_squared[0]
 
   ''' 

@@ -32,7 +32,7 @@ class Assertor():
     anno = anno.__annotations__
     for key in locals_:
       if key == 'self': continue
-      if key in exceptions: continue
+      if key in exceptions and locals_[key] == None: continue
       if type(locals_[key]) != anno[key]:
         raise OuterRealmMismatch((f'User input error. Mismatch data type for key "{key}". Expected {anno[key]} ' 
                                   f'but got {type(locals_[key])}'))
