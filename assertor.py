@@ -84,6 +84,6 @@ class Assertor():
 
     # check data compability
     for data in dataset.take(1):
-      if data.shape != (expected_window_length, expected_channel_size):
-        raise OuterRealmMismatch((f'Your {data_name} dataset is incompatible! Your dataset is {data.shape} '
+      if data[0].shape != (expected_window_length, expected_channel_size):
+        raise OuterRealmMismatch((f'Your {data_name} dataset is incompatible! Your dataset is {data[0].shape} '
                                   f'but {(expected_window_length, expected_channel_size)} is expected!'))
