@@ -117,11 +117,11 @@ class Apex(Assertor):
       validation_loss = []
 
       for val_data in val_dataset:
-        validation_loss.append(evaluate_epoch(val_data[0], val_data[1]))
+        validation_loss.append(self.evaluate_epoch(val_data[0], val_data[1]))
 
       # converting into a tensor
       validation_loss = tf.convert_to_tensor(validation_loss)
-      
+
       # average validation loss
       validation_loss = float(tf.math.reduce_mean(validation_loss))
 
