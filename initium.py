@@ -24,9 +24,9 @@ def _map_reader(three_channel: bool):
     # parsing example and tensor
     parsed_example = tf.io.parse_example(bin, config)
     if not three_channel:
-      data = tf.io.parse_tensor(parsed_example['data'], tf.float32)[:,0:1,:]
+      data = tf.io.parse_tensor(parsed_example['data'], tf.float32)[:,0:1,300:5000]
     else:
-      data = tf.io.parse_tensor(parsed_example['data'], tf.float32)[:,:,:]
+      data = tf.io.parse_tensor(parsed_example['data'], tf.float32)[:,:,300:5000]
 
     # transposing BxCxW to BxWxC (B: Batch Size, W: Window Size, C: Channel) 
     data = tf.transpose(data, perm=[0, 2, 1])
