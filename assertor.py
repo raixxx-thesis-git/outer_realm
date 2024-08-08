@@ -38,6 +38,9 @@ class Assertor():
                                   f'but got {type(locals_[key])}'))
     pass
 
+  ''' 
+  * Description: This method checks user's model compability
+  '''
   def model_assert_input_compability(self, model: Functional, apex_obj: Apex) -> None:
     # expected window length: W
     expected_window_length = apex_obj.window_length
@@ -64,6 +67,9 @@ class Assertor():
                                 f' but {expected_channel} is expected!'))
     pass
 
+  ''' 
+  * Description: This method checks user's model compability
+  '''
   def model_assert_output_compability(self, model: Functional, apex_obj: Apex) -> None:
     expected_output = 1
     model_output_shape = model.layers[-1].output.shape
@@ -78,6 +84,9 @@ class Assertor():
                                 f' but {expected_output} is expected!'))
     pass
 
+  ''' 
+  * Description: This method checks user's dataset compability
+  '''
   def dataset_assert_compability(self, dataset: _UnbatchDataset, data_name: str, apex_obj: Apex) -> None:
     expected_window_length = apex_obj.window_length
     expected_channel_size = apex_obj.channel_size
