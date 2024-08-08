@@ -44,12 +44,16 @@ class Apex(Assertor):
     self.loss = self.default_loss if user_loss == None else user_loss
 
     # check model compability
+    print('Please wait. Checking model compability.')
     self.model_assert_input_compability(model, self)
     self.model_assert_output_compability(model, self)
+    print('Done! Your model is compatible.')
     
     # check dataset compability
-    # self.dataset_assert_compability(training_dataset, 'training', self)
-    # self.dataset_assert_compability(validation_dataset, 'validation', self)
+    print('Please wait. Checking dataset compability.')
+    self.dataset_assert_compability(training_dataset, 'training', self)
+    self.dataset_assert_compability(validation_dataset, 'validation', self)
+    print('Done! Your dataset is compatible.')
 
     # assign model and dataset if compatible
     self.training_dataset = training_dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
@@ -66,8 +70,10 @@ class Apex(Assertor):
     self.enforce_static_writing(self.update_model, locals())
 
     # check model compability
+    print('Please wait. Checking model compability.')
     self.model_assert_input_compability(model, self)
     self.model_assert_output_compability(model, self)
+    print('Done! Your model is compatible.')
 
     # only if the model passes all the test the model would be updated
     self.model = model
@@ -76,8 +82,10 @@ class Apex(Assertor):
     self.enforce_static_writing(self.update_dataset, locals())
 
     # check dataset compability
+    print('Please wait. Checking dataset compability.')
     self.dataset_assert_compability(training_dataset, 'training', self)
     self.dataset_assert_compability(validation_dataset, 'validation', self)
+    print('Done! Your dataset is compatible.')
 
     # update dataset
     self.training_dataset = training_dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
@@ -124,7 +132,7 @@ class Apex(Assertor):
     # generate unique training id
     self.training_session_id = str(uuid.uuid4())
     os.mkdir(self.training_session_id)
-    print((f'Your training session ID: {self.training_session_id}.\nAll training logs and model will' 
+    print((f'Your training session ID: {self.training_session_id}.\nAll training logs and model will ' 
            f'automatically be saved in {self.training_session_id} folder'))
 
     # refresh memory
