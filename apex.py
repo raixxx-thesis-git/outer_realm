@@ -193,11 +193,11 @@ class Apex(Assertor):
     os.mkdir(cache_folder)
     train_dataset = (self.training_dataset
                          .batch(self.batch_size)
-                         .cache(f'{cache_folder}/training-{training_session_id}')
+                         .cache(f'{cache_folder}/training-{self.training_session_id}')
                          .prefetch(tf.data.AUTOTUNE))
     val_dataset = (self.validation_dataset
                        .batch(self.batch_size)
-                       .cache(f'{cache_folder}/validation-{training_session_id}')
+                       .cache(f'{cache_folder}/validation-{self.training_session_id}')
                        .prefetch(tf.data.AUTOTUNE))
     logs = {'id': self.training_session_id, 
             'training_loss':[], 
