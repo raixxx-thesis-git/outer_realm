@@ -35,7 +35,6 @@ def _map_reader(bin: SymbolicTensor) -> (SymbolicTensor, SymbolicTensor):
 
 def reader_get_data_and_epicenter(tfrecords_dir: list) -> _UnbatchDataset:
   # enforcing the user to comply with the predefined data type
-  assertor = Assertor()
-  assertor.enforce_static_writing(reader_get_data_and_epicenter, locals())
+  Assertor().enforce_static_writing(reader_get_data_and_epicenter, locals())
 
   return tf.data.TFRecordDataset(tfrecords_dir).map(_map_reader).unbatch()
