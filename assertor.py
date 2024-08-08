@@ -5,7 +5,7 @@ from tensorflow.keras import Model
 import tensorflow as tf
 
 if TYPE_CHECKING:
-    from outer_realm.assertor import Assertor
+    from outer_realm.assertor import Apex
 
 ''' 
   * DO NOT TOUCH! INTERNAL USE ONLY!
@@ -65,12 +65,12 @@ class Assertor():
     expected_output = 1
     model_output_shape = model.layers[-1].output.shape
 
-    if len(model_input_shape) != 2:
-      raise OuterRealmMismatch(f'Model error. Expected (None, 1) but got {model_input_shape}')
+    if len(model_output_shape) != 2:
+      raise OuterRealmMismatch(f'Model error. Expected (None, 1) but got {model_output_shape}')
 
     # model's output is not a scalar (or a vector if the batch is considered)
-    if model_input_shape[1] != expected_output:
+    if model_output_shape[1] != expected_output:
       raise OuterRealmMismatch((f'Model is incompatible with the output!' 
-                                f' Your model expects {model_input_shape[1]}'
+                                f' Your model expects {model_output_shape[1]}'
                                 f' but {expected_output} is expected!'))
     pass

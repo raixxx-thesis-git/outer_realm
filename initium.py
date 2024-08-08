@@ -2,7 +2,7 @@ from tensorflow.python.data.ops.unbatch_op import _UnbatchDataset
 from tensorflow.python.framework.ops import SymbolicTensor
 import tensorflow as tf
 
-from .assertor import Assertor
+from outer_realm.assertor import Assertor
 
 ''' 
   * DO NOT TOUCH!
@@ -14,10 +14,14 @@ from .assertor import Assertor
 '''
 @tf.function
 def _map_reader(bin: SymbolicTensor) -> (SymbolicTensor, SymbolicTensor):
-  # parsing example
-  parsed_example = tf.io.parse_example(bin, parsing_config)
+  # complying with the tfrecord structure
+  config = {
+    'data': tf.io.FixedLenFeature([], tf.string),
+    'dist': tf.io.FixedLenFeature([], tf.string)
+  }
 
-  # parsing serialized waveform data
+  # parsing example and tensor
+  parsed_example = tf.io.parse_example(bin, config)
   data = tf.io.parse_tensor(parsed_example['data'], tf.float32)
 
   # transposing BxCxW to BxWxC (B: Batch Size, W: Window Size, C: Channel) 
@@ -31,7 +35,7 @@ def _map_reader(bin: SymbolicTensor) -> (SymbolicTensor, SymbolicTensor):
 
 def reader_get_data_and_epicenter(tfrecords_dir: list) -> _UnbatchDataset:
   # enforcing the user to comply with the predefined data type
-  assertor = outer_realm.Assertor()
+  assertor = Assertor()
   assertor.enforce_static_writing(reader_get_data_and_epicenter, locals())
 
   return tf.data.TFRecordDataset(tfrecords_dir).map(_map_reader).unbatch()
