@@ -72,13 +72,16 @@ class Apex(Assertor):
     self.temp_optimizer = copy.deepcopy(self.optimizer)
 
     # count total batch
-    total_batch = get_dataset_length(self.training_dataset)
+    print('Please wait. Counting total batch now.')
+    total_batch = int(self.get_dataset_length(self.training_dataset))
+    print(f'Done! I found {total_batch} batches in your dataset.')
 
     # dataset
     train_dataset = self.training_dataset.take(-1)
     val_dataset = self.validation_dataset
 
     # start training
+    print('Entering training stage now...')
     for epoch in range(1, self.epoch + 1):
       # draw training bar
       bar = draw_training_bar(total_batch)
@@ -112,7 +115,7 @@ class Apex(Assertor):
     * Description: This method checks whether the model complies with the
       user's defined configuration.
   '''
-  def model_check_compability(self, model):
+  def model_check_compability(self, model: Functional):
     self.model_assert_input_compability(model, self)
     self.model_assert_output_compability(model, self)
     
