@@ -63,9 +63,15 @@ class Apex(Assertor):
     # optional(s):
     self.total_batch = None
 
+  ''' 
+    * Description: This method is used to assign an optimizer (MANDATORY!)
+  '''
   def update_optimizer(self, optimizer: any) -> None:
     self.optimizer = optimizer
 
+  ''' 
+    * Description: This method is used to update the user's model
+  '''
   def update_model(self, model: Functional) -> None:
     self.enforce_static_writing(self.update_model, locals())
 
@@ -78,6 +84,9 @@ class Apex(Assertor):
     # only if the model passes all the test the model would be updated
     self.model = model
 
+  ''' 
+    * Description: This method is used to update the user's datasets
+  '''
   def update_dataset(self, training_dataset: _UnbatchDataset, validation_dataset: _UnbatchDataset) -> None:
     self.enforce_static_writing(self.update_dataset, locals())
 
@@ -91,46 +100,72 @@ class Apex(Assertor):
     self.training_dataset = training_dataset
     self.validation_dataset = validation_dataset
 
+  ''' 
+    * Description: This method updates the batch size
+  '''
   def update_batch_size(self, batch_size: int) -> None:
     # enforce the user to comply with the predefined data type
     self.enforce_static_writing(self.update_batch_size, locals())
 
     self.batch_size = batch_size
 
+  ''' 
+    * Description: This method updates the total epoch
+  '''
   def update_epoch(self, epoch: int) -> None:
     # enforce the user to comply with the predefined data type
     self.enforce_static_writing(self.update_epoch, locals())
 
     self.epoch = epoch
 
+  ''' 
+    * Description: This method updates the window length configuration.
+  '''
   def update_window_length(self, window_length: int) -> None:
     # enforce the user to comply with the predefined data type
     self.enforce_static_writing(self.update_window_length, locals())
 
     self.window_length = window_length
 
+  ''' 
+    * Description: This method updates the channel size configuration.
+  '''
   def update_channel_size(self, channel_size: int) -> None:
     # enforce the user to comply with the predefined data type
     self.enforce_static_writing(self.update_channel_size, locals())
 
     self.channel_size = channel_size
 
+  ''' 
+    * Description: This method would replace the default loss function (MSE)
+    with your loss function (user defined loss).
+  '''
   def update_loss(self, loss: Function) -> None:
     # enforce the user to comply with the predefined data type
     self.enforce_static_writing(self.update_loss, locals())
 
     self.loss = loss    
 
+  ''' 
+    * Description: This method clears previous keras backend's sessions and 
+    collects garbages.
+  '''
   def memory_refresh(self) -> None:
     tf.keras.backend.clear_session()
     gc.collect()
 
+  ''' 
+    * Description: This method is used to save your model.
+  '''
   def save_model(self, path: str) -> None:
     # enforce the user to comply with the predefined data type
     self.enforce_static_writing(self.save_model, locals())
 
     self.model.save(path)
 
+  ''' 
+    * Description: This method is called to train the model.
+  '''
   def train(self, save_model_per_epoch: bool=False, calculate_r2_per_epoch: bool=True) -> None:
     # enforce the user to comply with the predefined data type
     self.enforce_static_writing(self.train, locals())
@@ -221,7 +256,7 @@ class Apex(Assertor):
 
   ''' 
     * DO NOT TOUCH! INTERNAL USE ONLY!
-    * Description: This method writes the model training history in json
+    * Description: This method writes the model training history in json.
   '''
   def write_json(self, logs: dict) -> None:
     json_object = json.dumps(logs)
