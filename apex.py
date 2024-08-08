@@ -31,6 +31,13 @@ class Apex(Assertor):
     # enforcing the user to comply with the predefined data type
     self.enforce_static_writing(self.__init__, locals(), exceptions=['user_loss'])
 
+    # check model compability
+    self.model_check_compability(model)
+    
+    # check dataset compability
+    self.dataset_assert_compability(training_dataset, 'training')
+    self.dataset_assert_compability(validation_dataset, 'validation')
+
     # configurations
     self.batch_size = batch_size
     self.training_dataset = training_dataset.batch(batch_size)
@@ -39,11 +46,6 @@ class Apex(Assertor):
     self.channel_size = channel_size
     self.user_loss = user_loss
     self.epoch = epoch
-    
-    # the tests: check model compability
-    self.model_check_compability(model)
-
-    # adding model to the object (only works after it passes the tests)
     self.model = model
 
 

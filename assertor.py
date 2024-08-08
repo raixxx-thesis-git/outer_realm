@@ -1,5 +1,6 @@
 from __future__ import annotations 
 from typing import TYPE_CHECKING
+from tensorflow.python.data.ops.unbatch_op import _UnbatchDataset
 from keras.src.models.functional import Functional
 
 import tensorflow as tf
@@ -76,3 +77,13 @@ class Assertor():
                                 f' Your model expects {model_output_shape[1]}'
                                 f' but {expected_output} is expected!'))
     pass
+
+  def dataset_assert_compability(self, dataset: _UnbatchDataset, data_name: str) -> None:
+    expected_window_length = apex_obj.window_length
+    expected_channel_size = apex_obj.channel_size
+
+    # check data compability
+    for data in apex_obj.dataset.take(1):
+      if data.shape != (expected_window_length, expected_channel_size):
+        raise OuterRealmMismatch((f'Your {data_name} dataset is incompatible! Your dataset is {data.shape} '
+                                  f'but {(expected_window_length, expected_channel_size)} is expected!'))
