@@ -14,6 +14,7 @@ import tensorflow as tf
 import outer_realm
 import tqdm
 import copy
+import gc
 
 class Apex(Assertor):
   def __init__(self,
@@ -27,7 +28,7 @@ class Apex(Assertor):
                user_loss: Function = None,
                ) -> None:
     # enforcing the user to comply with the predefined data type
-    #self.enforce_static_writing(self.__init__, locals())
+    self.enforce_static_writing(self.__init__, locals())
 
     # configurations
     self.batch_size = batch_size
@@ -38,21 +39,77 @@ class Apex(Assertor):
     self.epoch = epoch
     
     # the tests: check model compability
-    # self.model_check_compability()
+    self.model_check_compability(model)
 
     # adding model to the object (only works after it passes the tests)
     self.model = model
 
-  def model_check_compability():
-    assertor.model_assert_input_compability(self.model, self)
-    assertor.model_assert_output_compability(self.model, self)
 
   def define_optimizer(self, optimizer):
     self.optimizer = optimizer
 
   def update_model(self, model: Model) -> None:
-    assertor.model_assert_input_compability(self.model, self)
-    assertor.model_assert_output_compability(self.model, self)
+    # enforcing the user to comply with the predefined data type
+    self.enforce_static_writing(self.update_model, locals())
+
+    # check model compability
+    self.model_check_compability(model)
+
+    # only if the model passes all the test the model would be updated
+    self.model = model
+
+  def train(self):
+    # refreshing memory
+    tf.keras.backend.clear_session()
+    gc.collect()
+
+    # creating a copy optimizer
+    self.temp_optimizer = copy.deepcopy(self.optimizer)
+
+    # count total batch
+    total_batch = get_dataset_length(self.training_dataset)
+
+    # dataset
+    train_dataset = self.training_dataset.take(-1)
+    val_dataset = self.validation_dataset
+
+    # start training
+    for epoch in range(1, self.epoch + 1):
+      # draw training bar
+      bar = draw_training_bar(total_batch)
+
+      # updating model's tensor (learning)
+      for train_data in train_dataset:
+        # info: the following call is optimized.
+        training_loss = float(self.update_trainable_tensors(train_data[0], train_data[1]))
+
+        bar.set_description_str(f'Training Loss: {training_loss:.4f}')
+        bar.update(1)
+      
+      # close bar after an epoch
+      bar.close()
+    
+      # validation eval
+      validation_loss = tf.constant(0.0)
+
+      for val_data in val_dataset:
+        predicted = self.model(val_data[0])
+        expected = val_data[1]
+        validation_loss += self.loss(predicted, expected)
+
+      # average validation loss
+      validation_loss = float(tf.math.reduce_mean(validation_loss))
+
+      print(f'Validation Loss: {validation_loss:.4f}')
+
+  ''' 
+    * DO NOT TOUCH! INTERNAL USE ONLY!
+    * Description: This method checks whether the model complies with the
+      user's defined configuration.
+  '''
+  def model_check_compability(self, model):
+    self.model_assert_input_compability(model, self)
+    self.model_assert_output_compability(model, self)
     
   ''' 
     * DO NOT TOUCH! INTERNAL USE ONLY!
@@ -108,47 +165,3 @@ class Apex(Assertor):
   '''
   def draw_training_bar(self, total_batch: int) -> Tqdm:
     return tqdm.tqdm(total=total_batches, ascii='._█', position=0, bar_format='|{bar:30}| [{elapsed}<{remaining}] {desc}')
-
-  def train(self):
-    # creating a copy optimizer
-    self.temp_optimizer = copy.deepcopy(self.optimizer)
-
-    # count total batch
-    total_batch = get_dataset_length(self.training_dataset)
-
-    # dataset
-    train_dataset = self.training_dataset.take(-1)
-    val_dataset = self.validation_dataset
-
-    # start training
-    for epoch in range(1, self.epoch + 1):
-      # draw training bar
-      bar = draw_training_bar(total_batch)
-
-      # updating model's tensor (learning)
-      for train_data in train_dataset:
-        # info: the following call is optimized.
-        training_loss = float(self.update_trainable_tensors(train_data[0], train_data[1]))
-
-        bar.set_description_str(f'Training Loss: {training_loss:.4f}')
-        bar.update(1)
-      
-      # close bar after an epoch
-      bar.close()
-    
-      # validation eval
-      validation_loss = tf.constant(0.0)
-
-      for val_data in val_dataset:
-        predicted = self.model(val_data[0])
-        expected = val_data[1]
-        validation_loss += self.loss(predicted, expected)
-
-      # average validation loss
-      validation_loss = float(tf.math.reduce_mean(validation_loss))
-
-      print(f'Validation Loss: {validation_loss:.4f}')
-
-  
-
-    

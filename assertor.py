@@ -35,14 +35,14 @@ class Assertor():
                                   f'but got {type(locals_[key])}'))
     pass
 
-  def model_assert_input_compability(self, apex_obj: Apex) -> None:
+  def model_assert_input_compability(self, model: Model, apex_obj: Apex) -> None:
     # expected window length: W
     expected_window_length = apex_obj.window_length
 
     # expected channel size: C
     expected_channel = apex_obj.channel_size
 
-    model_input_shape = apex_obj.model.layers[0].output.shape
+    model_input_shape = model.layers[0].output.shape
 
     # model should be (None, W, C) 
     if len(model_input_shape) != 3:
@@ -61,9 +61,9 @@ class Assertor():
                                 f' but {expected_window_length[1]} is expected!'))
     pass
 
-  def model_assert_output_compability(self, apex_obj: Apex) -> None:
+  def model_assert_output_compability(self, model: Model, apex_obj: Apex) -> None:
     expected_output = 1
-    model_output_shape = apex_obj.model.layers[-1].output.shape
+    model_output_shape = model.layers[-1].output.shape
 
     if len(model_input_shape) != 2:
       raise OuterRealmMismatch(f'Model error. Expected (None, 1) but got {model_input_shape}')
