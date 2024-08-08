@@ -228,7 +228,7 @@ class Apex(Assertor):
       logs['training_loss'].append(training_loss)
 
       # validation evaluation
-      validation_loss, validation_r2 = self.validation_data_get_logs(calculate_r2_per_epoch)
+      validation_loss, validation_r2 = self.validation_data_get_logs(val_dataset, calculate_r2_per_epoch)
       validation_loss = float(validation_loss)
       validation_r2 = float(validation_r2)
 
@@ -257,7 +257,7 @@ class Apex(Assertor):
     print('Closed training session, Apex Trainer is freed.')
 
   @tf.function
-  def validation_data_get_logs(self, calculate_r2_per_epoch: bool) -> (EagerTensor, EagerTensor):
+  def validation_data_get_logs(self, val_dataset, calculate_r2_per_epoch: bool) -> (EagerTensor, EagerTensor):
     validation_loss = tf.constant(0.0)
     validation_r2 = tf.constant(0.0)
     i = tf.constant(0.0)
