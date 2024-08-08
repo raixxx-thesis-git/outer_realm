@@ -28,7 +28,7 @@ class Apex(Assertor):
                epoch: int,
                user_loss: Function = None,
                ) -> None:
-    # enforcing the user to comply with the predefined data type
+    # enforce the user to comply with the predefined data type
     self.enforce_static_writing(self.__init__, locals(), exceptions=['user_loss'])
 
     # configurations
@@ -47,18 +47,17 @@ class Apex(Assertor):
     # self.dataset_assert_compability(validation_dataset, 'validation', self)
 
     # assign model and dataset if compatible
-    self.training_dataset = training_dataset.batch(batch_size)
-    self.validation_dataset = validation_dataset.batch(batch_size)
+    self.training_dataset = training_dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
+    self.validation_dataset = validation_dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
     self.model = model
 
     # optional(s):
     self.total_batch = None
 
-  def define_optimizer(self, optimizer):
+  def update_optimizer(self, optimizer: any) -> None:
     self.optimizer = optimizer
 
   def update_model(self, model: Functional) -> None:
-    # enforcing the user to comply with the predefined data type
     self.enforce_static_writing(self.update_model, locals())
 
     # check model compability
@@ -67,13 +66,47 @@ class Apex(Assertor):
     # only if the model passes all the test the model would be updated
     self.model = model
 
+  def update_dataset(self, training_dataset: _UnbatchDataset, validation_dataset: _UnbatchDataset) -> None:
+    self.enforce_static_writing(self.update_dataset, locals())
+
+    # check dataset compability
+    self.dataset_assert_compability(training_dataset, 'training', self)
+    self.dataset_assert_compability(validation_dataset, 'validation', self)
+
+    # update dataset
+    self.training_dataset = training_dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
+    self.validation_dataset = validation_dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
+
+  def update_batch_size(self, batch_size: int) -> None:
+    # enforce the user to comply with the predefined data type
+    self.enforce_static_writing(self.update_batch_size, locals())
+
+    self.batch_size = batch_size
+
+  def update_epoch(self, epoch: int) -> None:
+    # enforce the user to comply with the predefined data type
+    self.enforce_static_writing(self.update_epoch, locals())
+
+    self.epoch = epoch
+
+  def update_window_length(self, window_length: int) -> None:
+    # enforce the user to comply with the predefined data type
+    self.enforce_static_writing(self.update_window_length, locals())
+
+    self.window_length = window_length
+
+  def update_channel_size(self, channel_size: int) -> None:
+    # enforce the user to comply with the predefined data type
+    self.enforce_static_writing(self.update_channel_size, locals())
+
+    self.channel_size = channel_size
 
   def train(self):
-    # refreshing memory
+    # refresh memory
     tf.keras.backend.clear_session()
     gc.collect()
 
-    # creating a copy optimizer
+    # create a copy of an optimizer
     self.temp_optimizer = copy.deepcopy(self.optimizer)
 
     # count total batch
@@ -126,7 +159,7 @@ class Apex(Assertor):
       validation_r2 = float(tf.math.reduce_mean(validation_r2))
 
       print(f'Validation Loss: {validation_loss:.4f}')
-      print(f'Validation R2: {validation_r2:.4f}\n')
+      print(f'Validation R2: {validation_r2:.4f}%\n')
 
   ''' 
     * DO NOT TOUCH! INTERNAL USE ONLY!
