@@ -59,8 +59,8 @@ class Assertor():
 
     # model's channel size != C
     if model_input_shape[2] != expected_channel:
-      raise OuterRealmMismatch((f'Model is incompatible with the expected channel size! Your model expects {model_input_shape[1]}'
-                                f' but {expected_window_length} is expected!'))
+      raise OuterRealmMismatch((f'Model is incompatible with the expected channel size! Your model expects {model_input_shape[2]}'
+                                f' but {expected_channel} is expected!'))
     pass
 
   def model_assert_output_compability(self, model: Functional, apex_obj: Apex) -> None:
