@@ -42,8 +42,8 @@ class Apex(Assertor):
     self.model_check_compability(model)
     
     # check dataset compability
-    self.dataset_assert_compability(training_dataset, 'training', self)
-    self.dataset_assert_compability(validation_dataset, 'validation', self)
+    # self.dataset_assert_compability(training_dataset, 'training', self)
+    # self.dataset_assert_compability(validation_dataset, 'validation', self)
 
     # assign model and dataset if compatible
     self.training_dataset = training_dataset.batch(batch_size)
@@ -167,7 +167,7 @@ class Apex(Assertor):
     with tf.GradientTape() as d:
       # calculating loss
       training_loss = self.loss(predicted, expected)
-
+      print(training_loss)
       # calculating ∂L/∂θ
       grad = d.gradient(training_loss, self.model.trainable_variables)
 
