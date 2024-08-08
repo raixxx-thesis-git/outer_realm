@@ -88,33 +88,30 @@ class Apex(Assertor):
     val_dataset = self.validation_dataset
 
     # start training
-    print('Entering training stage now.\nNote: The progress bar appears at the second epoch.')
+    print('Entering training stage now.\nNote: The proper progress bar appears at the second epoch.')
 
     for epoch in range(1, self.epoch + 1):
       #logging
       print(f'Epoch {epoch}/{self.epoch}')
 
       # draw training bar, appears at the second epoch
-      if epoch != 1:
-        bar = self.draw_training_bar(self.total_batch)
+      bar = self.draw_training_bar(self.total_batch)
 
       # updating model's tensor (learning)
       for train_data in train_dataset:
         # info: the following call is optimized.
-        # forward propagation: predicting value
-        predicted = self.model(train_data[0])
-        training_loss = float(self.update_trainable_tensors(predicted, train_data[1]))
-        
-        # bar appears at epoch = 2
-        if epoch != 1:
-          bar.set_description_str(f'Training Loss: {training_loss:.4f}')
-          bar.update(1)
-        else:
+        training_loss = float(self.update_trainable_tensors(train_data[0], train_data[1]))
+
+        # updating logs
+        bar.set_description_str(f'Training Loss: {training_loss:.4f}')
+        bar.update(1)
+
+        if epoch == 1:
           # counting up the batch
           self.total_batch += 1
       
       # bar appears at epoch = 2
-      if epoch != 1: bar.close()
+      bar.close()
     
       # validation eval
       validation_loss = tf.constant(0.0)
@@ -155,10 +152,13 @@ class Apex(Assertor):
       gradient updating via computational graph backward propagation.
   '''
   @tf.function
-  def update_trainable_tensors(self, predicted: EagerTensor, expected: EagerTensor):
+  def update_trainable_tensors(self, predicted: EagerTensor, expected: EagerTensor) -> EagerTensor:
 
     # applying backward propagation gradient
     with tf.GradientTape() as d:
+      # forward propagation: predicting value
+      predicted = self.model(train_data[0])
+
       # calculating loss
       training_loss = self.loss(predicted, expected)
 
