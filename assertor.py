@@ -1,6 +1,6 @@
 from __future__ import annotations 
 from typing import TYPE_CHECKING
-from tensorflow.keras import Model
+from keras.src.models.functional import Functional
 
 import tensorflow as tf
 
@@ -36,7 +36,7 @@ class Assertor():
                                   f'but got {type(locals_[key])}'))
     pass
 
-  def model_assert_input_compability(self, model: Model, apex_obj: Apex) -> None:
+  def model_assert_input_compability(self, model: Functional, apex_obj: Apex) -> None:
     # expected window length: W
     expected_window_length = apex_obj.window_length
 
@@ -62,7 +62,7 @@ class Assertor():
                                 f' but {expected_window_length[1]} is expected!'))
     pass
 
-  def model_assert_output_compability(self, model: Model, apex_obj: Apex) -> None:
+  def model_assert_output_compability(self, model: Functional, apex_obj: Apex) -> None:
     expected_output = 1
     model_output_shape = model.layers[-1].output.shape
 

@@ -6,6 +6,7 @@ from tensorflow.python.eager.polymorphic_function.polymorphic_function import Fu
 from tensorflow.python.data.ops.unbatch_op import _UnbatchDataset
 from tensorflow.python.data.ops.batch_op import _BatchDataset
 from tensorflow.python.framework.ops import EagerTensor
+from keras.src.models.functional import Functional
 from outer_realm import Assertor
 from tensorflow.keras import Model
 from tqdm.std import tqdm as Tqdm
@@ -23,7 +24,7 @@ class Apex(Assertor):
                window_length: int,
                channel_size: int,
                batch_size: int,
-               model: Model,
+               model: Functional,
                epoch: int,
                user_loss: Function = None,
                ) -> None:
@@ -48,7 +49,7 @@ class Apex(Assertor):
   def define_optimizer(self, optimizer):
     self.optimizer = optimizer
 
-  def update_model(self, model: Model) -> None:
+  def update_model(self, model: Functional) -> None:
     # enforcing the user to comply with the predefined data type
     self.enforce_static_writing(self.update_model, locals())
 
