@@ -81,9 +81,7 @@ class Apex(Assertor):
     self.temp_optimizer = copy.deepcopy(self.optimizer)
 
     # count total batch
-    if self.total_batch == None: self.count_total_batch()
-    else:
-      print(f'I found {total_batch} batches in your dataset.')
+    self.total_batch = 0
 
     # dataset
     train_dataset = self.training_dataset.take(-1)
@@ -92,19 +90,25 @@ class Apex(Assertor):
     # start training
     print('Entering training stage now...')
     for epoch in range(1, self.epoch + 1):
-      # draw training bar
-      bar = self.draw_training_bar(total_batch)
+      # draw training bar, appears at the second epoch
+      if epoch != 1:
+        bar = self.draw_training_bar(self.total_batch)
 
       # updating model's tensor (learning)
       for train_data in train_dataset:
         # info: the following call is optimized.
         training_loss = float(self.update_trainable_tensors(train_data[0], train_data[1]))
-
-        bar.set_description_str(f'Training Loss: {training_loss:.4f}')
-        bar.update(1)
+        
+        # bar appears at epoch = 2
+        if epoch != 1:
+          bar.set_description_str(f'Training Loss: {training_loss:.4f}')
+          bar.update(1)
+        else:
+          # counting up the batch
+          self.total_batch += 1
       
-      # close bar after an epoch
-      bar.close()
+      # bar appears at epoch = 2
+      if epoch != 1: bar.close()
     
       # validation eval
       validation_loss = tf.constant(0.0)
