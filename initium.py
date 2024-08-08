@@ -22,7 +22,7 @@ def _map_reader(three_channel: bool):
   @tf.function
   def map(bin: SymbolicTensor) -> (SymbolicTensor, SymbolicTensor):
     # parsing example and tensor
-    parsed_example = tf.io.parse_example(bin, config)
+    parsed_example = tf.io.parse_single_example(bin, config)
     if not three_channel:
       data = tf.io.parse_tensor(parsed_example['data'], tf.float32)[:,0:1,:]
     else:
