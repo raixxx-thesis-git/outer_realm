@@ -42,8 +42,8 @@ class Apex(Assertor):
     self.model_check_compability(model)
     
     # check dataset compability
-    self.dataset_assert_compability(training_dataset, 'training')
-    self.dataset_assert_compability(validation_dataset, 'validation')
+    self.dataset_assert_compability(training_dataset, 'training', self)
+    self.dataset_assert_compability(validation_dataset, 'validation', self)
 
     # assign model and dataset if compatible
     self.training_dataset = training_dataset.batch(batch_size)
